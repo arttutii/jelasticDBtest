@@ -22,7 +22,7 @@ const host = process.env.DB_HOST;
     mongoose.connect('mongodb://' + user + ":" + pw + "@" + host).then(() => {
     console.log('Connected successfully.');
 
-    /*cats.create({ name:"asd", age:12, gender:"Robot" }).then(post => {
+    /*cats.create({ name:"JEEBEN", age:12, gender:"Male" }).then(post => {
         console.log(post.id);
     });*/
 
@@ -31,16 +31,21 @@ const host = process.env.DB_HOST;
     console.log('Connection to db failed: ' + err);
 });
 
-app.get('/', function(req, res) {
-    res.send("Hello");
+app.get('/', (req, res) => {
+    cats.find().exec().then((cats) => {
+        res.render('catView', {
+            title: 'cats cats cats',
+            catValues: cats
+        });
+    });
 
 });
 
-app.get('/cats', function(req, res) {
-    cats.find().where('age').gt('10').exec().then((cats) => {
+app.get('/cats', (req, res) => {
+    cats.find().exec().then((cats) => {
         res.render('catView', {
-            title: 'Page title',
-            message: res.send("hello" + cats)
+            title: 'Page title cats cats cats',
+            message: 'cats cats cats ' + res.send(cats)
         });
     });
 

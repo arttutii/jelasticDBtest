@@ -1,5 +1,12 @@
+doctype html
 html
     head
-    title= title
+        meta(charset='utf-8')
+        title= title
     body
-    h1= message
+        table
+            each i in catValues
+                tr
+                    th= i.name
+                    th= i.age
+                    th= i.gender

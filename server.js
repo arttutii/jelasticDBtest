@@ -1,9 +1,21 @@
 const mongoose = require('mongoose');
 const express = require('express');
+const https = require('https');
+const http = require('http');
+const fs = require('fs');
 const dotenv = require('dotenv').config();
 const app = express();
+
 mongoose.Promise = global.Promise; //ES6 Promise
 app.set('view engine', 'pug');
+app.enable('trust proxy');
+
+const sslkey = fs.readFileSync('ssl-key.pem');
+const sslcert = fs.readFileSync('ssl-cert.pem');
+const certOptions = {
+    key: sslkey,
+    cert: sslcert
+};
 
 const Schema = mongoose.Schema;
 
@@ -26,7 +38,22 @@ const host = process.env.DB_HOST;
         console.log(post.id);
     });*/
 
-    app.listen(3000);
+    https.createServer(certOptions, app).listen(3000);
+    /*http.createServer((req, res) => {
+        res.writeHead(301, { 'Location': 'https://localhost:3000' + req.url });
+        res.end();
+    }).listen(8080);*/
+
+    app.use ((req, res, next) => {
+        if (req.secure) {
+            // request was via https, so do no special handling
+            next();
+        } else {
+            // request was via http, so redirect to https
+            res.redirect('https://' + req.headers.host + req.url);
+        }
+    });
+
 }, err => {
     console.log('Connection to db failed: ' + err);
 });

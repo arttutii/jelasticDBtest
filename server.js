@@ -9,7 +9,7 @@ const app = express();
 
 // set up database
 // DB.connect('mongodb://alakerta:q1w2e3r4@localhost/alakerta', app);
-DB.connect('mongodb://alakerta:q1w2e3r4@mongodb12679-alakerta.jelastic.metropolia.fi/alakerta', app);
+DB.connect('mongodb://testuser:password@localhost:27017/cats', app);
 const spySchema = {
     time: Date,
     category: String,
@@ -42,16 +42,42 @@ const upload = multer({storage: storage});
 // serve files
 app.use(express.static('files'));
 
+app.use('/doc', express.static('doc'));
+
 app.use('/modules', express.static('node_modules'));
 
-
-
-// get posts
+// get all items
 app.get('/posts', (req, res) => {
     Spy.find().exec().then((posts) => {
         res.send(posts);
     });
 });
+
+// find specific item
+app.get('/posts/:search', (req, res) => {
+    Spy.find().exec().then((posts) => {
+        var re = new RegExp(req.params.search, 'i');
+
+        Spy.find().or([{ 'title': { $regex: re }}, { 'details': { $regex: re }}, { 'category': { $regex: re }}]).exec((err, result) => {
+            res.send(JSON.stringify(result));
+        });
+    });
+    //res.send('got '+req.method+' request to '+req.path+ ' with parameters: '+req.params.param1);
+});
+
+app.get('/test/', (req, res) => {
+    Spy.find().exec().then((posts) => {
+        const id = req.params.param1;
+        Spy.findById(posts[id]).exec().then((item) => {
+            res.send(item);
+        });
+    });
+
+    res.send('got '+req.method+' request to '+req.path+
+        ' with route parameters: '+JSON.stringify(req.params)+
+        ' and with query parameters: '+JSON.stringify(req.query));
+});
+
 
 // add new *************
 // get form data and create object for database (=req.body)
@@ -63,7 +89,7 @@ app.post('/new', upload.single('file'), (req, res, next) => {
     req.body.time = new Date().getTime();
     // get EXIF data
     try {
-        new ExifImage({image: file.path}, function (error, exifData) {
+        /*new ExifImage({image: file.path}, function (error, exifData) {
             if (error) {
                 console.log('Error: ' + error.message);
             } else {
@@ -74,7 +100,13 @@ app.post('/new', upload.single('file'), (req, res, next) => {
                 }; // Do something with your data!
                 next();
             }
-        });
+        });*/
+        req.body.coordinates = {
+            lat: 60.2196781,
+            lng: 24.8079786
+        }; // Do something with your data!
+        next();
+
     } catch (error) {
         console.log('Error: ' + error.message);
         res.send({status: 'error', message: 'EXIF error'});
@@ -102,8 +134,80 @@ app.use('/new', (req, res, next) => {
     }).then(() => {
         res.send({status: 'error', message: 'Database error'});
     });
+
 });
 // end add new ******************
+
+// start update ****************
+app.put('/update', upload.single('file'), (req, res, next) => {
+    const file = req.file;
+    req.body.thumbnail = 'thumb/' + file.filename;
+    req.body.image = 'img/' + file.filename;
+    req.body.original = 'original/' + file.filename;
+    req.body.time = new Date().getTime();
+    req.body.coordinates = {
+        lat: 60.2196781,
+        lng: 24.8079786
+    };
+    next();
+
+});
+
+// create thumbnails
+app.use('/update', (req, res, next) => {
+    const small = thumbnail.getThumbnail('files/'+req.body.original, 'files/'+req.body.thumbnail, 300, 300);
+    if( typeof small === 'object'){
+        res.send(small);
+    }
+    const medium = thumbnail.getThumbnail('files/'+req.body.original, 'files/'+req.body.image, 720, 480);
+    if( typeof medium === 'object'){
+        res.send(medium);
+    }
+    next();
+});
+
+// add to DB
+app.use('/update', (req, res, next) => {
+    console.log(req.body);
+
+    Spy.findById(req.body.id, (err, upd) => {
+        console.log(upd);
+        const c = req.body;
+        upd.title = c.title;
+        upd.category = c.category;
+        upd.details = c. details;
+        upd.image = c.image;
+        upd.thumbnail = c.thumbnail;
+        upd.original = c.original;
+        upd.time = c.time;
+        upd.coordinates = c.coordinates;
+
+        upd.save((err, updatedItem) => {
+            if (err) return handleError(err);
+        });
+    }).then(post => {
+        res.send({status: 'OK', post: post});
+    }).then(() => {
+        res.send({status: 'error', message: 'Database error'});
+    });
+
+});
+// end update *************
+
+app.delete('/remove', upload.single('file'), (req, res) => {
+    console.log(req.body);
+    Spy.findByIdAndRemove(req.body.id, (err, rmv) => {
+
+        rmv.save((err, deletedItem) => {
+            if (err) return handleError(err);
+        })
+    }).then(post => {
+        res.send({status: 'OK', post: post});
+    }).then(() => {
+        res.send({status: 'error', message: 'Database error'});
+    });
+
+});
 
 // convert GPS coordinates to GoogleMaps format
 const gpsToDecimal = (gpsData, hem) => {

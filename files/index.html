@@ -32,6 +32,12 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#add">Add</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#update" id="updateTabButton">Update</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#remove">Delete</a>
+                </li>
             </ul>
         </div>
     </div>
@@ -46,6 +52,14 @@
                         <div class="btn-group  mr-2" role="group" aria-label="Basic example">
                             <button id="reset-button" class="btn btn-secondary">All</button>
                         </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="input-group">
+                        <input id="searchInput" type="text" class="form-control" placeholder="Search for...">
+                        <span class="input-group-btn">
+                    <button class="btn btn-secondary" type="button" id="searchButton">Go!</button>
+                </span>
                     </div>
                 </div>
             </div>
@@ -88,6 +102,54 @@
                             <small id="imageHelp" class="form-text text-muted">Add image</small>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="update" role="tabpanel">
+            <div class="row">
+                <div id="updateForm" class="col">
+                    <div class="jumbotron">
+                        <h3>Update SpyEvent</h3>
+                    </div>
+                    <label>Select item to update</label>
+                    <select class="form-control" id="catSelect"></select>
+                    <form id="updateSpyForm">
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <input type="text" class="form-control" id="categoryUpdated" name="category"
+                                   placeholder="Enter category">
+                        </div>
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <input type="text" class="form-control" id="titleUpdated" name="title"
+                                   placeholder="Enter title">
+                        </div>
+                        <div class="form-group">
+                            <label for="details">Description</label>
+                            <textarea class="form-control" id="detailsUpdated" name="details" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="image">Image</label>
+                            <input type="file" class="form-control-file" id="image" aria-describedby="imageHelp">
+                            <small id="imageHelp" class="form-text text-muted">Add image</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="remove" role="tabpanel">
+            <div class="row">
+                <div id="removeSpyForm" class="col">
+                    <div class="jumbotron">
+                        <h3>Remove SpyEvent</h3>
+                    </div>
+                    <label>Select item to remove</label>
+                    <select class="form-control" id="removeCatSelect"></select>
+                    <br>
+                    <form id="removeSpyForm">
+                        <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </div>
             </div>

@@ -38,7 +38,7 @@ const host = process.env.DB_HOST;
         console.log(post.id);
     });*/
 
-    https.createServer(certOptions, app).listen(3000);
+    //https.createServer(certOptions, app).listen(3000);
     /*http.createServer((req, res) => {
         res.writeHead(301, { 'Location': 'https://localhost:3000' + req.url });
         res.end();
@@ -53,6 +53,8 @@ const host = process.env.DB_HOST;
             res.redirect('https://' + req.headers.host + req.url);
         }
     });
+
+    app.listen(3000);
 
 }, err => {
     console.log('Connection to db failed: ' + err);

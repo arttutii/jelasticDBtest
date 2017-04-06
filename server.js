@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const multer = require('multer');
+const dotenv = require('dotenv').config();
 const ExifImage = require('exif').ExifImage;
 const DB = require('./modules/database');
 const thumbnail = require('./modules/thumbnail');
@@ -9,7 +10,10 @@ const app = express();
 
 // set up database
 // DB.connect('mongodb://alakerta:q1w2e3r4@localhost/alakerta', app);
-DB.connect('mongodb://testuser:password@localhost:27017/cats', app);
+const user = process.env.DB_USER;
+const pw = process.env.DB_PASS;
+const host = process.env.DB_HOST;
+DB.connect('mongodb://' + user + ":" + pw + "@" + host, app);
 const spySchema = {
     time: Date,
     category: String,
@@ -56,7 +60,7 @@ app.get('/posts', (req, res) => {
 // find specific item
 app.get('/posts/:search', (req, res) => {
     Spy.find().exec().then((posts) => {
-        var re = new RegExp(req.params.search, 'i');
+        const re = new RegExp(req.params.search, 'i');
 
         Spy.find().or([{ 'title': { $regex: re }}, { 'details': { $regex: re }}, { 'category': { $regex: re }}]).exec((err, result) => {
             res.send(JSON.stringify(result));

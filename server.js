@@ -1,19 +1,59 @@
-const express = require('express');
-const path = require('path');
-const multer = require('multer');
-const dotenv = require('dotenv').config();
-const ExifImage = require('exif').ExifImage;
-const DB = require('./modules/database');
-const thumbnail = require('./modules/thumbnail');
+const express = require('express'),
+    path = require('path'),
+    multer = require('multer'),
+    dotenv = require('dotenv').config(),
+    ExifImage = require('exif').ExifImage,
+    DB = require('./modules/database'),
+    thumbnail = require('./modules/thumbnail'),
+    passport = require('passport'),
+    LocalStrategy = require('passport-local').Strategy,
+    passportLocalMongoose = require('passport-local-mongoose');
+
 
 const app = express();
+app.enable('trust proxy');
+
+const userSchema = {
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+};
+
+/*const User = DB.getSchema(userSchema, 'User');
+User.plugin(passportLocalMongoose);
+
+// use static authenticate method of model in LocalStrategy
+passport.use(User.createStrategy());*/
+
+passport.use(new LocalStrategy(
+    (username, password, done) => {
+        if (username !== process.env.username || password !== process.env.password) {
+            done(null, false, {message: 'Incorrect credentials.'});
+            return;
+        }
+        return done(null, {});
+    }
+));
+app.use(passport.initialize());
+
+// use static serialize and deserialize of model for passport session support
+//passport.serializeUser(User.serializeUser());
+//passport.deserializeUser(User.deserializeUser());
+
+app.post('/login',
+    passport.authenticate('local', {
+        successRedirect: '/',
+        failureRedirect: '/test',
+        session: false }), () => {
+
+    }
+);
 
 // set up database
-// DB.connect('mongodb://alakerta:q1w2e3r4@localhost/alakerta', app);
 const user = process.env.DB_USER;
 const pw = process.env.DB_PASS;
 const host = process.env.DB_HOST;
 DB.connect('mongodb://' + user + ":" + pw + "@" + host, app);
+
 const spySchema = {
     time: Date,
     category: String,
@@ -58,32 +98,50 @@ app.get('/posts', (req, res) => {
 });
 
 // find specific item
+/**
+ *
+ * @api {get} /post/:search Getting an item/items
+ * @apiName Search
+ * @apiGroup Items
+ * @apiDescription Get items from database with a search query
+ *
+ * @apiParam {String} search User's query for the search
+ *
+ * @apiSuccess {Array} Array List of the items matching the query
+ *
+ * @apiSuccessExample Success-Response:
+ *     HTTP/1.1 200 OK
+ *     [{
+ *     "_id":"58e2190793d2433b162979b8",
+ *     "category":"Wizard",
+ *     "title":"merlin",
+ *     "details":"asd",
+ *     "thumbnail":"thumb/1491212551665.jpg",
+ *     "image":"img/1491212551665.jpg",
+ *     "original":"original/1491212551665.jpg",
+ *     "time":"2017-04-03T09:42:31.708Z",
+ *     "__v":0
+ *     }]
+ *
+ */
 app.get('/posts/:search', (req, res) => {
-    Spy.find().exec().then((posts) => {
-        const re = new RegExp(req.params.search, 'i');
+    const re = new RegExp(req.params.search, 'i');
 
-        Spy.find().or([{ 'title': { $regex: re }}, { 'details': { $regex: re }}, { 'category': { $regex: re }}]).exec((err, result) => {
-            res.send(JSON.stringify(result));
-        });
+    Spy.find().or([{ 'title': { $regex: re }}, { 'details': { $regex: re }}, { 'category': { $regex: re }}]).exec((err, result) => {
+        res.send(JSON.stringify(result));
     });
-    //res.send('got '+req.method+' request to '+req.path+ ' with parameters: '+req.params.param1);
 });
-
-app.get('/test/', (req, res) => {
-    Spy.find().exec().then((posts) => {
-        const id = req.params.param1;
-        Spy.findById(posts[id]).exec().then((item) => {
-            res.send(item);
-        });
-    });
-
-    res.send('got '+req.method+' request to '+req.path+
-        ' with route parameters: '+JSON.stringify(req.params)+
-        ' and with query parameters: '+JSON.stringify(req.query));
-});
-
 
 // add new *************
+/**
+ *
+ * @api {post} /new Adding an item
+ * @apiName Add new
+ * @apiGroup Items
+ * @apiDescription A sequence which happens when the Add-form's submit is triggered
+ *
+ * @apiParam {FormData} A FormData object containing all the information from the Add-form
+ */
 // get form data and create object for database (=req.body)
 app.post('/new', upload.single('file'), (req, res, next) => {
     const file = req.file;
@@ -91,30 +149,12 @@ app.post('/new', upload.single('file'), (req, res, next) => {
     req.body.image = 'img/' + file.filename;
     req.body.original = 'original/' + file.filename;
     req.body.time = new Date().getTime();
-    // get EXIF data
-    try {
-        /*new ExifImage({image: file.path}, function (error, exifData) {
-            if (error) {
-                console.log('Error: ' + error.message);
-            } else {
-                // console.log(exifData.gps);
-                req.body.coordinates = {
-                    lat: gpsToDecimal(exifData.gps.GPSLatitude, exifData.gps.GPSLatitudeRef),
-                    lng: gpsToDecimal(exifData.gps.GPSLongitude, exifData.gps.GPSLongitudeRef)
-                }; // Do something with your data!
-                next();
-            }
-        });*/
-        req.body.coordinates = {
-            lat: 60.2196781,
-            lng: 24.8079786
-        }; // Do something with your data!
-        next();
+    req.body.coordinates = {
+        lat: 60.2196781,
+        lng: 24.8079786
+    };
+    next();
 
-    } catch (error) {
-        console.log('Error: ' + error.message);
-        res.send({status: 'error', message: 'EXIF error'});
-    }
 });
 
 // create thumbnails
@@ -177,7 +217,7 @@ app.use('/update', (req, res, next) => {
     Spy.findById(req.body.id, (err, upd) => {
         console.log(upd);
         const c = req.body;
-        upd.title = c.title;
+        upd.title = req.body.title || c.title;
         upd.category = c.category;
         upd.details = c. details;
         upd.image = c.image;
@@ -201,7 +241,6 @@ app.use('/update', (req, res, next) => {
 app.delete('/remove', upload.single('file'), (req, res) => {
     console.log(req.body);
     Spy.findByIdAndRemove(req.body.id, (err, rmv) => {
-
         rmv.save((err, deletedItem) => {
             if (err) return handleError(err);
         })

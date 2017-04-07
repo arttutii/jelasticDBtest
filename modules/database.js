@@ -11,6 +11,15 @@ class Database {
         this.app = app;
         this.mongoose.connect(this.url).then(() => {
             console.log('Connected to Mongo');
+            this.app.use ((req, res, next) => {
+                if (req.secure) {
+                    // request was via https, so do no special handling
+                    next();
+                } else {
+                    // request was via http, so redirect to https
+                    res.redirect('https://' + req.headers.host + req.url);
+                }
+            });
         this.app.listen(3000);
     }, (err) => {
             console.log(err.message);

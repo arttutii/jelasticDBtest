@@ -9,44 +9,8 @@ const express = require('express'),
     LocalStrategy = require('passport-local').Strategy,
     passportLocalMongoose = require('passport-local-mongoose');
 
-
 const app = express();
 app.enable('trust proxy');
-
-const userSchema = {
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-};
-
-/*const User = DB.getSchema(userSchema, 'User');
-User.plugin(passportLocalMongoose);
-
-// use static authenticate method of model in LocalStrategy
-passport.use(User.createStrategy());*/
-
-passport.use(new LocalStrategy(
-    (username, password, done) => {
-        if (username !== process.env.username || password !== process.env.password) {
-            done(null, false, {message: 'Incorrect credentials.'});
-            return;
-        }
-        return done(null, {});
-    }
-));
-app.use(passport.initialize());
-
-// use static serialize and deserialize of model for passport session support
-//passport.serializeUser(User.serializeUser());
-//passport.deserializeUser(User.deserializeUser());
-
-app.post('/login',
-    passport.authenticate('local', {
-        successRedirect: '/',
-        failureRedirect: '/test',
-        session: false }), () => {
-
-    }
-);
 
 // set up database
 const user = process.env.DB_USER;
@@ -127,8 +91,12 @@ app.get('/posts', (req, res) => {
 app.get('/posts/:search', (req, res) => {
     const re = new RegExp(req.params.search, 'i');
 
-    Spy.find().or([{ 'title': { $regex: re }}, { 'details': { $regex: re }}, { 'category': { $regex: re }}]).exec((err, result) => {
-        res.send(JSON.stringify(result));
+    Spy.find().or([
+            { 'title': { $regex: re }},
+            { 'details': { $regex: re }},
+            { 'category': { $regex: re }}
+        ]).exec((err, result) => {
+            res.send(JSON.stringify(result));
     });
 });
 

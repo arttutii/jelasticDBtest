@@ -184,10 +184,14 @@ app.use('/new', (req, res, next) => {
 
 // start update ****************
 app.patch('/update', upload.single('file'), (req, res, next) => {
-    const file = req.file;
-    req.body.thumbnail = 'thumb/' + file.filename;
-    req.body.image = 'img/' + file.filename;
-    req.body.original = 'original/' + file.filename;
+
+    if (req.file != null) {
+        const file = req.file;
+        req.body.thumbnail = 'thumb/' + file.filename;
+        req.body.image = 'img/' + file.filename;
+        req.body.original = 'original/' + file.filename;
+    }
+
     req.body.time = new Date().getTime();
     req.body.coordinates = {
         lat: 60.2196781,
@@ -199,14 +203,17 @@ app.patch('/update', upload.single('file'), (req, res, next) => {
 });
 // create thumbnails
 app.use('/update', (req, res, next) => {
-    const small = thumbnail.getThumbnail('files/'+req.body.original, 'files/'+req.body.thumbnail, 300, 300);
-    if( typeof small === 'object'){
-        res.send(small);
+    if (req.file != null){
+        const small = thumbnail.getThumbnail('files/'+req.body.original, 'files/'+req.body.thumbnail, 300, 300);
+        if( typeof small === 'object'){
+            res.send(small);
+        }
+        const medium = thumbnail.getThumbnail('files/'+req.body.original, 'files/'+req.body.image, 720, 480);
+        if( typeof medium === 'object'){
+            res.send(medium);
+        }
     }
-    const medium = thumbnail.getThumbnail('files/'+req.body.original, 'files/'+req.body.image, 720, 480);
-    if( typeof medium === 'object'){
-        res.send(medium);
-    }
+
     next();
 });
 

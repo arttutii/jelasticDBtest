@@ -60,7 +60,9 @@ typings/
 .env
 
 # webstorm workspace
+.idea
 .idea/
+.idea/*
 
 # json package
 package.json

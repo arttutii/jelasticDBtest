@@ -183,7 +183,7 @@ app.use('/new', (req, res, next) => {
 // end add new ******************
 
 // start update ****************
-app.put('/update', upload.single('file'), (req, res, next) => {
+app.patch('/update', upload.single('file'), (req, res, next) => {
     const file = req.file;
     req.body.thumbnail = 'thumb/' + file.filename;
     req.body.image = 'img/' + file.filename;
@@ -193,10 +193,10 @@ app.put('/update', upload.single('file'), (req, res, next) => {
         lat: 60.2196781,
         lng: 24.8079786
     };
+
     next();
 
 });
-
 // create thumbnails
 app.use('/update', (req, res, next) => {
     const small = thumbnail.getThumbnail('files/'+req.body.original, 'files/'+req.body.thumbnail, 300, 300);
@@ -214,26 +214,15 @@ app.use('/update', (req, res, next) => {
 app.use('/update', (req, res, next) => {
     console.log(req.body);
 
-    Spy.findById(req.body.id, (err, upd) => {
-        console.log(upd);
-        const c = req.body;
-        upd.title = req.body.title || c.title;
-        upd.category = c.category;
-        upd.details = c. details;
-        upd.image = c.image;
-        upd.thumbnail = c.thumbnail;
-        upd.original = c.original;
-        upd.time = c.time;
-        upd.coordinates = c.coordinates;
-
-        upd.save((err, updatedItem) => {
-            if (err) return handleError(err);
-        });
-    }).then(post => {
+    Spy.update(
+        {_id  : req.body.id},
+        {$set: req.body}
+    ).then(post => {
         res.send({status: 'OK', post: post});
     }).then(() => {
         res.send({status: 'error', message: 'Database error'});
     });
+
 
 });
 // end update *************

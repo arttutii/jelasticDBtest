@@ -64,3 +64,8 @@ typings/
 
 # json package
 package.json
+
+# local image files
+files/img/
+files/original/
+files/thumb/

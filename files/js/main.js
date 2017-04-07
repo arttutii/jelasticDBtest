@@ -168,7 +168,7 @@ document.querySelector('#updateSpyForm').addEventListener('submit', (evt) => {
     const url = '/update';
 
     fetch(url, {
-        method: 'put',
+        method: 'PATCH',
         body: data
     }).then((resp)=> {
         // console.log(resp);

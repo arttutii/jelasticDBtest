@@ -14,11 +14,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cookie-parser": "^1.4.3",
     "dotenv": "^4.0.0",
     "eslint": "^3.19.0",
     "express": "^4.15.2",
+    "express-accepts": "^0.1.0",
     "fs": "0.0.1-security",
     "https": "^1.0.0",
+    "moment": "^2.18.1",
     "mongoose": "^4.9.2",
     "pug": "^2.0.0-beta11",
     "supervisor": "^0.12.0"

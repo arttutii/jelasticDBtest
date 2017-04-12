@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Socket.io test</title>
+</head>
+
+<body>
+    <h1>Chat Here</h1>
+    <div id="nameArea">
+        <input type="text" placeholder="Choose a nickname" id="userNameInput">
+        <button id="userBtn">Apply</button>
+    </div>
+    <div id="channelArea">
+        <input type="text" placeholder="Enter a channel name" id="channelInput">
+        <button id="channelBtn">Enter</button>
+        <p id="currentChannel">No Channel</p>
+    </div>
+    <div id="sendArea">
+        <input type="text" placeholder="Write text" id="textInput">
+        <button id="sendBtn">Send</button>
+    </div>
+    <div id="textArea"></div>
+</body>
+
+
+<script src="socket.io.js"></script>
+<script src="main.js"></script>
+</html>

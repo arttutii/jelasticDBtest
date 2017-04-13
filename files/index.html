@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/main.css">
     <script src="js/vendor/modernizr-2.8.3.min.js"></script>
+    <script src="https://simplewebrtc.com/latest-v2.js"></script>
 </head>
 <body>
 <!--[if lt IE 8]>
@@ -37,6 +38,9 @@
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#remove">Delete</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#video" id="videoTabButton" >Video chat</a>
                 </li>
             </ul>
         </div>
@@ -141,7 +145,7 @@
         </div>
         <div class="tab-pane" id="remove" role="tabpanel">
             <div class="row">
-                <div id="removeSpyForm" class="col">
+                <div id="removeForm" class="col">
                     <div class="jumbotron">
                         <h3>Remove SpyEvent</h3>
                     </div>
@@ -154,6 +158,17 @@
                 </div>
             </div>
         </div>
+        <div class="tab-pane" id="video" role="tabpanel">
+            <div class="row">
+                <div id="videoArea" class="col">
+                    <h2>You</h2>
+                    <video id="localVideo"></video>
+                    <h2>Them</h2>
+                    <div id="remoteVideos"></div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 

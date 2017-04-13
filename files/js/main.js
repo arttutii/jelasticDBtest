@@ -197,12 +197,28 @@ document.querySelector('#removeSpyForm').addEventListener('submit', (evt) => {
     });
 });
 
+document.getElementById('videoTabButton').addEventListener('click', () => {
+    const webrtc = new SimpleWebRTC({
+        // the id/element dom element that will hold "our" video
+        localVideoEl: 'localVideo',
+        // the id/element dom element that will hold remote videos
+        remoteVideosEl: 'remoteVideos',
+        // immediately ask for camera access
+        autoRequestMedia: true,
+
+    });
+
+    webrtc.on('readyToCall', function () {
+        webrtc.joinRoom('bena');
+    });
+
+});
+
 // init tabs
 $('#myTabs a').click(function (e) {
     e.preventDefault();
     $(this).tab('show');
 });
-
 
 document.getElementById('searchButton').addEventListener('click', () => {
     const searchQuery = document.getElementById('searchInput').value;
@@ -215,7 +231,6 @@ document.getElementById('searchInput').addEventListener('keypress', (e) => {
         getData(searchQuery);
     }
 });
-
 
 // listener for select options
 document.getElementById('catSelect').addEventListener('change', () => {
